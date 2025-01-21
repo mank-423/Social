@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigateAuth } from "../hooks/useNavigateAuth";
-import { AuthType } from "../types/authField";
-import authService from "../services/authService";
 import { enqueueSnackbar } from "notistack";
+import authService from "../../services/authService";
+import { useNavigateAuth } from "../../hooks/useNavigateAuth";
+import { AuthType } from "../../types/authField";
 
 const Auth = ({ mode }: AuthType) => {
     const { navigateToLogin, navigateToRegister, navigateAfterLogin } = useNavigateAuth();

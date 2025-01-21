@@ -19,7 +19,7 @@ export function useNavigateAuth(): NavigateAuth {
     };
 
     const navigateAfterLogin = () => {
-        navigate('/');
+        navigate('/posts');
     }
 
     return { navigateToLogin, navigateToRegister, navigateAfterLogin };

@@ -1,5 +1,6 @@
-import Auth from "../components/Auth";
+
 import bg from "../assets/bg.jpg"
+import Auth from "../components/Auth/Auth"
 
 const Register = () => {
   return (
