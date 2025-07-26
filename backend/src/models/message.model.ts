@@ -3,21 +3,23 @@ import { ObjectId } from "mongodb";
 
 const messageSchema: Schema = new Schema({
     senderId: {
-        type: ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
     receiverId: {
-        type: ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
     text: {
         type: String,
-        required: true,
     },
     imageUrl: {
         type: String,
-        default: " ",
     } 
+},{
+    timestamps: true,
 });
 
 const Message = mongoose.model('message', messageSchema);

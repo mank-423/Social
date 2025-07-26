@@ -1,11 +1,14 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import authRoutes from './routes/auth.routes';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/db';
 import cookieParser from 'cookie-parser'
+
+// Route import
+import authRoutes from './routes/auth.routes';
+import messageRoutes from './routes/message.routes';
 
 dotenv.config();
 
@@ -40,6 +43,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // Authentication
 app.use('/api/auth', authRoutes);
+
+// Message route
+app.use('/api/message', messageRoutes);
 
 // Docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(swaggerOptions)));
