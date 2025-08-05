@@ -77,7 +77,8 @@ export const signUp = async (req: Request, res: Response) => {
 
     if (!saltRounds) throw new Error("Salting variable missing");
 
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const rounds = parseInt(saltRounds);
+    const hashedPassword = await bcrypt.hash(password, rounds);
 
     const newUser = new User({
       email, 

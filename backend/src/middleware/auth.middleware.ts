@@ -43,6 +43,6 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
 
         next();
     } catch (error) {
-
+        console.log('Error in protect route:', error);
     }
 }
