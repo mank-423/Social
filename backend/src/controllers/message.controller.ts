@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User from "../models/user.model";
 import Message from "../models/message.model";
 import cloudinary from "../utils/cloudinary";
+import { getReceiverSocketId, io } from "../lib/socket";
 
 export const getUsersForSidebar = async (req: Request, res: Response) => {
     try {
@@ -23,7 +24,7 @@ export const getMessage = async (req: Request, res: Response) => {
         const messages = await Message.find({
             $or: [
                 { senderId: myId, receiverId: userToChatId },
-                { senderId: userToChatId, recieverId: myId }
+                { senderId: userToChatId, receiverId: myId }
             ]
         });
 
@@ -61,6 +62,13 @@ export const sendMessage = async (req: Request, res: Response) => {
         await newMessage.save();
 
         // todo: realtime functionality goes here socket.io
+        const receiverSocketId = getReceiverSocketId(receiverId);
+
+        if (receiverSocketId){
+            // emit broadcasts, we need to send to a specific user
+            io.to(receiverSocketId).emit("newMessage", newMessage)
+        }
+        
         return res.status(201).json({ status: true, data: newMessage });
     } catch (error) {
         console.log('Error in creating message:', error);

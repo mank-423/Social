@@ -1,3 +1,4 @@
+import type { Socket } from "socket.io-client";
 import type { LoginUser, UpdateUser, userType } from "./auth";
 import type { messageStructure } from "./message";
 
@@ -19,12 +20,16 @@ export interface AuthStore {
   isLoggingIn: boolean;
   isUpdatingProfile: boolean;
   onlineUsers: Array<string>;
+  socket: Socket | null;
 
   checkAuth: () => Promise<void>;
   signUp: (data: userType) => Promise<void>;
   logOut: () => Promise<void>;
   logIn: (data: LoginUser) => Promise<void>;
   updateProfile: (data: UpdateUser) => Promise<void>;
+
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 }
 
 
@@ -41,6 +46,8 @@ export interface ContactStore {
   messages: Array<messageStructure>;
   selectedUser: null | AuthUser;
   isMessageSending: boolean;
+  subscribeToMessages: () => void;
+  unsubscribeToMessages: () => void;
   setSelectedUser: (data: AuthUser | null) => void;
   getUsers: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;

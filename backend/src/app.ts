@@ -6,13 +6,14 @@ import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/db';
 import cookieParser from 'cookie-parser'
 
+
 // Route import
 import authRoutes from './routes/auth.routes';
 import messageRoutes from './routes/message.routes';
+import { app, server } from './lib/socket';
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -55,7 +56,7 @@ app.use('/api/message', messageRoutes);
 // Docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(swaggerOptions)));
 
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
     console.log(`Server started on port ${PORT}`);
     connectDB();
 });
