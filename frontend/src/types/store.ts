@@ -1,10 +1,12 @@
-import type { LoginUser, userType } from "./auth";
+import type { LoginUser, UpdateUser, userType } from "./auth";
 
 interface AuthUser {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  // Add any other fields returned by `/auth/check`
+  profilePic?: string,
+  createdAt?: string,
+  updatedAt?:string,
 }
 
 
@@ -20,4 +22,5 @@ export interface AuthStore {
   signUp: (data: userType) => Promise<void>;
   logOut: () => Promise<void>;
   logIn: (data: LoginUser) => Promise<void>;
+  updateProfile: (data: UpdateUser) => Promise<void>;
 }

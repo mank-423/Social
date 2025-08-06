@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { axiosInstance } from '../utils/axios'
 import type { AuthStore } from '../types/store';
-import type { LoginUser, userType } from '../types/auth';
+import type { LoginUser, UpdateUser, userType } from '../types/auth';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     checkAuth: async () => {
         try {
             const res = await axiosInstance.get('/auth/check');
-            set({ authUser: res.data });
+            set({ authUser: res.data.data });
         } catch (error) {
             console.log('Error in checking auth:', error);
             set({ authUser: null });
@@ -29,7 +29,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
         set({ isSigningUp: true });
         try {
             const res = await axiosInstance.post('/auth/signup', data);
-            set({ authUser: res.data });
+            console.log("Response signin:", res.data);
+            set({ authUser: res.data.data });
             toast.success("Account created successfully");
         } catch (error) {
             const err = error as AxiosError<{ message: string }>
@@ -54,7 +55,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         set({ isLoggingIn: true });
         try {
             const res = await axiosInstance.post("/auth/login", data);
-            set({ authUser: res.data });
+            set({ authUser: res.data.user });
             toast.success("Logged In successfully");
         } catch (error) {
             const err = error as AxiosError<{ message: string }>
@@ -62,6 +63,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
             toast.error(err?.response?.data?.message || 'Error occured during signup');
         } finally {
             set({ isLoggingIn: false });
+        }
+    },
+
+    updateProfile: async(data: UpdateUser) => {
+        try {
+            set({isUpdatingProfile: true});
+            const res = await axiosInstance.post("/auth/update-profile", data);
+            const newUserData = res.data.data;
+            set({authUser: newUserData});
+            toast.success("Profile updated!");
+        } catch (error) {
+            toast.error('Error in profile update!');
+        } finally{
+            set({isUpdatingProfile: false});
         }
     }
 }))
