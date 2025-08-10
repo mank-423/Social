@@ -19,7 +19,7 @@ export const generateToken = (userId: Types.ObjectId, res: Response) => {
     res.cookie('jwt', token, {
         httpOnly: true, // prevent XSS attacks cross-scripting attakcs
         secure: process.env.NODE_ENV === 'production',
-        sameSite: "strict", // CSRF attack, cross-site request forgery attacks protection
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // CSRF attack, cross-site request forgery attacks protection
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 }

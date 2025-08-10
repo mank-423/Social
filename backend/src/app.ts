@@ -20,7 +20,11 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 
 app.use(
-    cors({ credentials: true, origin: true, exposedHeaders: ["Set-Cookie"] })
+    cors({ 
+        credentials: true, 
+        origin: true, 
+        exposedHeaders: ['Set-Cookie'] 
+    })
 );
 
 app.use(cookieParser());
