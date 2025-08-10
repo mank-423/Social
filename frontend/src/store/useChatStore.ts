@@ -17,7 +17,6 @@ export const useChatStore = create<ContactStore>((set, get) => ({
         set(({ isUsersLoading: true }));
         try {
             const res = await axiosInstance.get('/message/users');
-            console.log("Contact list:", res.data.data);
             set({ users: res.data.data });
         } catch (error) {
             toast.error('Error getting contacts');
@@ -30,7 +29,6 @@ export const useChatStore = create<ContactStore>((set, get) => ({
         set({ isMessagesLoading: true });
         try {
             const res = await axiosInstance.get(`/message/${userId}`);
-            console.log('Messages:', res.data);
             set({ messages: res.data.data });
         } catch (error) {
             toast.error('Error getting messages');
@@ -46,7 +44,6 @@ export const useChatStore = create<ContactStore>((set, get) => ({
 
         try {
             const res = await axiosInstance.post(`/message/send/${selectedUser?._id}`, messageData);
-            console.log("res:", res);
             set({ messages: [...messages, res.data.data] });
         } catch (error) {
             toast.error('Error sending messages');
@@ -63,12 +60,10 @@ export const useChatStore = create<ContactStore>((set, get) => ({
         if (!selectedUser || !socket) return;
 
         
-
         socket.on("newMessage", (newMessage) => {
             // if message not the selectedUser
             const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-            if (isMessageSentFromSelectedUser) return;
-
+            if (!isMessageSentFromSelectedUser) return;
             set({messages: [...get().messages, newMessage]})
         })
     },
