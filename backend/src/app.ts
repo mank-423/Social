@@ -5,7 +5,6 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/db';
 import cookieParser from 'cookie-parser'
-import path from 'path';
 
 
 // Route import
@@ -16,7 +15,6 @@ import { app, server } from './lib/socket';
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
 
 // Middleware
 app.use(express.json());
@@ -57,15 +55,6 @@ app.use('/api/message', messageRoutes);
 
 // Docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(swaggerOptions)));
-
-
-if (process?.env?.NODE_ENV === 'production'){
-    app.use(express.static(path.join(__dirname, "../frontend/dist")))
-
-    app.get("*", (req, res)=>{
-        res.sendFile(path.join(__dirname+ "../frontend", "dist", "index.html"));
-    })
-}
 
 server.listen(PORT, async () => {
     console.log(`Server started on port ${PORT}`);
