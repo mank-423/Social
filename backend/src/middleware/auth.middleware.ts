@@ -13,7 +13,13 @@ declare global {
 
 export const protectRoute = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const token = req.cookies.jwt;
+        const authToken = req.headers.authorization;
+
+        if (!authToken?.startsWith('Bearer ')) {
+            return res.status(401).json({ status: false, message: 'token format is wrong or token missing!' })
+        }
+
+        const token = authToken.split(" ")[1];
 
         if (!token) {
             return res.status(401).json({ status: false, message: 'Unauthorized: token not provided' });
@@ -44,5 +50,6 @@ export const protectRoute = async (req: Request, res: Response, next: NextFuncti
         next();
     } catch (error) {
         console.log('Error in protect route:', error);
+        return res.status(401).json({ status: false, message: 'Unauthorized: token expired or invalid' });
     }
 }

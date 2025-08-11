@@ -5,7 +5,7 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/db';
 import cookieParser from 'cookie-parser'
-
+import { authLimiter, globalLimiter } from './utils/rateLimiter';
 
 // Route import
 import authRoutes from './routes/auth.routes';
@@ -26,6 +26,9 @@ app.use(
         exposedHeaders: ['Set-Cookie'] 
     })
 );
+
+// GLobal rate limiting
+app.use(globalLimiter);
 
 app.use(cookieParser());
 
@@ -51,10 +54,10 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Authentication
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 
 // Message route
-app.use('/api/message', messageRoutes);
+app.use('/api/message', authLimiter, messageRoutes);
 
 // Docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(swaggerOptions)));
