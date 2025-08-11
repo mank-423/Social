@@ -27,6 +27,7 @@ export interface AuthStore {
   logOut: () => Promise<void>;
   logIn: (data: LoginUser) => Promise<void>;
   updateProfile: (data: UpdateUser) => Promise<void>;
+  refresh: () => Promise<string | null>;
 
   connectSocket: () => void;
   disconnectSocket: () => void;

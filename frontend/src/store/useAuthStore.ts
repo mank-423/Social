@@ -5,6 +5,7 @@ import type { LoginUser, UpdateUser, userType } from '../types/auth';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { io } from "socket.io-client"
+import Cookies from 'js-cookie';
 
 const baseURL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
@@ -36,6 +37,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const res = await axiosInstance.post('/auth/signup', data);
             console.log("Response signin:", res.data);
+            const accessToken = res.data.accessToken;
+            Cookies.set('accessToken', accessToken);
             set({ authUser: res.data.data });
             get().connectSocket();
             toast.success("Account created successfully");
@@ -51,6 +54,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     logOut: async () => {
         try {
             await axiosInstance.post("/auth/logout");
+            Cookies.remove('accessToken');
             set({ authUser: null });
             get().disconnectSocket();
             toast.success("Logged out successfully");
@@ -63,7 +67,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         set({ isLoggingIn: true });
         try {
             const res = await axiosInstance.post("/auth/login", data);
+            const accessToken = res.data.accessToken;
             set({ authUser: res.data.user });
+            Cookies.set('accessToken', accessToken)
             toast.success("Logged In successfully");
             get().connectSocket();
         } catch (error) {
@@ -72,6 +78,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             toast.error(err?.response?.data?.message || 'Error occured during login');
         } finally {
             set({ isLoggingIn: false });
+        }
+    },
+
+    refresh: async() => {
+        try {
+            const res = await axiosInstance.post("/auth/refresh");
+            const accessToken = res.data.data;
+            Cookies.set('accessToken', accessToken);
+
+            return accessToken;
+        } catch (error) {
+            console.log('Error refreshing accessToken:', error);
         }
     },
 
@@ -102,15 +120,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         socket.connect();
 
         set({ socket: socket });
-        
+
         socket.on("getOnlineUsers", (userIds: Array<string>) => {
-            set({onlineUsers: userIds})
+            set({ onlineUsers: userIds })
         })
     },
 
     disconnectSocket: () => {
-        if (get().socket?.connected){
+        if (get().socket?.connected) {
             get().socket?.disconnect();
         }
-     },
+    },
 }))
