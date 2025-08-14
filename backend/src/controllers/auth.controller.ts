@@ -4,6 +4,8 @@ import { generateAccessToken, generateToken } from "../utils/tokenGenerate";
 import bcrypt from 'bcryptjs'
 import cloudinary from "../utils/cloudinary";
 import jwt from 'jsonwebtoken';
+import { signUpValidation } from "../validations/auth.validation";
+import { AuthService } from "../services/auth.service";
 
 // Sign up 
 export const signUp = async (req: Request, res: Response) => {
@@ -11,94 +13,20 @@ export const signUp = async (req: Request, res: Response) => {
 
     const { email, fullName, password } = req.body;
 
-    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-
-    const checkForRegex = (pattern: RegExp, pass: string): boolean => {
-      return pattern.test(pass);
-    }
-
-    let errors: { key: string, message: string }[] = [];
-
-    // Password validation
-    if (password) {
-      let passwordMessage = ""
-
-      // Length
-      if (password.length < 6) {
-        passwordMessage += 'Length should be greater than 6.'
-      }
-
-      // Regex
-      if (!checkForRegex(passwordPattern, password)) {
-        passwordMessage += 'Check if password has 1 upper, 1 lower, and 1 alphabet.'
-      }
-
-      if (passwordMessage.length > 0) {
-        errors.push({
-          key: 'password',
-          message: passwordMessage
-        });
-      }
-    }
-
-    if (email) {
-      const user = await User.findOne({ email });
-      let emailError = ""
-
-      if (user) {
-        emailError += "User already exists on this email."
-      }
-
-      if (!checkForRegex(emailPattern, email)) {
-        emailError += "Email format is wrong."
-      }
-
-      if (emailError.length > 0) {
-        errors.push({
-          key: 'email',
-          message: emailError
-        })
-      }
-    }
-
-    if (fullName.length <= 0) {
-      errors.push({
-        key: 'name',
-        message: 'Full Name is required',
-      })
-    }
+    const errors = await signUpValidation(fullName, email, password);
 
     if (errors.length > 0) {
       return res.status(400).json({ status: false, message: 'Error in credentials', error: errors });
     }
 
-    const saltRounds = process.env.HASH_SALT_ROUND;
+    const { user, accessToken } = await AuthService.signUp(email, fullName, password, res);
 
-    if (!saltRounds) throw new Error("Salting variable missing");
-
-    const rounds = parseInt(saltRounds);
-    const hashedPassword = await bcrypt.hash(password, rounds);
-
-    const newUser = new User({
-      email,
-      fullName,
-      password: hashedPassword,
-      profileUrl: ""
-    })
-
-    if (newUser) {
-      // generate web token
-      await newUser.save();
-
-      // Generating access token
-      const accessToken = generateToken(newUser._id, res);
-
-      return res.status(201).json({ status: true, message: 'User created successfully', data: newUser, accessToken });
-    } else {
-      return res.status(400).json({ status: false, message: 'Error creating user' });
-    }
+    return res.status(201).json({
+      status: true,
+      message: 'User created successfully',
+      data: user,
+      accessToken
+    });
 
   } catch (error) {
     console.error("Sign up error:", error);
@@ -197,7 +125,7 @@ export const generateRefreshToken = (req: Request, res: Response) => {
   jwt.verify(token, key, (err: any, decoded: any) => {
     if (err) return res.status(403).json({ status: false, message: 'Invalid refresh token' })
     const accessToken = generateAccessToken(decoded.userId);
-    res.status(200).json({status: true, message: 'New access token', data: accessToken});
+    res.status(200).json({ status: true, message: 'New access token', data: accessToken });
   })
 
 }
