@@ -2,7 +2,9 @@ import bcrypt from 'bcryptjs';
 import User from "../models/user.model";
 import { Types } from "mongoose";
 import { Response } from "express";
-import { generateToken } from '../utils/tokenGenerate';
+import { generateAccessToken, generateToken } from '../utils/tokenGenerate';
+import cloudinary from '../utils/cloudinary';
+import jwt from 'jsonwebtoken';
 
 export class AuthService {
     static async signUp(email: string, fullName: string, password: string, res: Response) {
@@ -24,4 +26,53 @@ export class AuthService {
 
         return { user: newUser, accessToken };
     }
+
+
+    static async logIn(email: string, password: string, res: Response) {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return { error: 'Invalid credentials', accessToken: '', user: null };
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            return { error: 'Invalid password!', accessToken: '', user: null };
+        }
+
+        const accessToken = generateToken(user._id as Types.ObjectId, res);
+
+        return { error: '', accessToken, user };
+    }
+
+
+    static async updateProfile(url: string, userId: Types.ObjectId) {
+        if (!url) {
+            return { error: "Url doesn't exists", user: '' };
+        }
+
+        const uploadResponse = await cloudinary.uploader.upload(url);
+        const uploadUser = await User.findByIdAndUpdate(userId, { profilePic: uploadResponse.secure_url }, { new: true });
+
+        return { error: '', user: uploadUser };
+    }
+
+    static generateRefreshToken(token: string) {
+        if (!token) {
+            return { error: "Token doesn't exist", accessToken: '' };
+        }
+
+        if (!process.env.JWT_SECRET_KEY) {
+            throw new Error('JWT secret key not set');
+        }
+
+        try {
+            const decoded: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
+            const accessToken = generateAccessToken(decoded.userId);
+            return { error: '', accessToken };
+        } catch (err) {
+            return { error: 'Invalid refresh token', accessToken: '' };
+        }
+    }
+
 }

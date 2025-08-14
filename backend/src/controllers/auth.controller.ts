@@ -1,9 +1,4 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import { generateAccessToken, generateToken } from "../utils/tokenGenerate";
-import bcrypt from 'bcryptjs'
-import cloudinary from "../utils/cloudinary";
-import jwt from 'jsonwebtoken';
 import { signUpValidation } from "../validations/auth.validation";
 import { AuthService } from "../services/auth.service";
 
@@ -39,22 +34,13 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const {user, accessToken, error} = await AuthService.logIn(email, password, res);
 
-    if (!user) {
-      console.log('User email is wrong');
-      return res.status(400).json({ status: false, message: 'Invalid credentials' });
+    if (error) {
+      return res.status(400).json({ status: false, message: error });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordCorrect) {
-      console.log('Password is wrong!')
-      return res.status(400).json({ status: false, message: 'Invalid credentials' });
-    }
-
-    if (user) {
-      const accessToken = generateToken(user._id, res);
+    if (accessToken) {
       return res.status(200).json({ user, accessToken });
     }
 
@@ -76,7 +62,6 @@ export const logout = (req: Request, res: Response) => {
 
 }
 
-
 // Update profile
 export const updateProfile = async (req: Request, res: Response) => {
   try {
@@ -84,15 +69,13 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     const userId = req.user._id;
 
-    if (!profileUrl) {
-      return res.status(400).json({ status: false, message: 'Profile pic not provided' });
+    const {user, error} = await AuthService.updateProfile(profileUrl, userId);
+
+    if (error) {
+      return res.status(400).json({ status: false, message: error });
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(profileUrl);
-
-    const uploadUser = await User.findByIdAndUpdate(userId, { profilePic: uploadResponse.secure_url }, { new: true })
-
-    return res.status(200).json({ status: true, message: 'Profile pic uploaded successfully', data: uploadUser })
+    return res.status(200).json({ status: true, message: 'Profile pic uploaded successfully', data: user })
   } catch (error) {
     console.log('Error', error);
     return res.status(500).json({ status: false, message: 'Internal Server Error' });
@@ -100,6 +83,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
 }
 
+// Check auth
 export const checkAuth = (req: Request, res: Response) => {
   try {
     return res.status(200).json({ status: true, data: req.user });
@@ -109,23 +93,16 @@ export const checkAuth = (req: Request, res: Response) => {
   }
 }
 
+// Generate refresh token
 export const generateRefreshToken = (req: Request, res: Response) => {
   const token = req.cookies.jwt;
 
-  if (!token) return res.status(401).json({ success: false, message: 'Refresh token not available' });
+  const {error, accessToken} = AuthService.generateRefreshToken(token);
 
-  let key: string;
-
-  if (!process.env.JWT_SECRET_KEY) {
-    throw new Error('Key not given')
-  } else {
-    key = process.env.JWT_SECRET_KEY;
+  if (error){
+    console.log('Error:', error);
+    return res.status(500).json({status: false, message:'Internal Server Error'});
   }
 
-  jwt.verify(token, key, (err: any, decoded: any) => {
-    if (err) return res.status(403).json({ status: false, message: 'Invalid refresh token' })
-    const accessToken = generateAccessToken(decoded.userId);
-    res.status(200).json({ status: true, message: 'New access token', data: accessToken });
-  })
-
+  return res.status(200).json({ status: true, message: 'New access token', data: accessToken });
 }

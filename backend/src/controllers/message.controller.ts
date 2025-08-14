@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import Message from "../models/message.model";
-import cloudinary from "../utils/cloudinary";
-import { getReceiverSocketId, io } from "../lib/socket";
+import { MessageService } from "../services/message.service";
 
 export const getUsersForSidebar = async (req: Request, res: Response) => {
+    if (!req.user || !req.user._id) {
+        return res.status(401).json({ status: false, message: "Unauthorized" });
+    }
+
     try {
         const loggedInUserId = req.user._id;
-        const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+        const { filteredUsers } = await MessageService.getAllUsers(loggedInUserId);
         return res.status(200).json({ status: true, message: "Sidebar users fetched", data: filteredUsers });
     } catch (error) {
         console.log("Error in get users sidebar:", error);
@@ -20,15 +21,13 @@ export const getMessage = async (req: Request, res: Response) => {
         const { id: userToChatId } = req.params;
 
         const myId = req.user._id;
+        const { messages, error } = await MessageService.getMessages(userToChatId, myId);
 
-        const messages = await Message.find({
-            $or: [
-                { senderId: myId, receiverId: userToChatId },
-                { senderId: userToChatId, receiverId: myId }
-            ]
-        });
-
+        if (error) {
+            return res.status(400).json({ status: false, message: error })
+        }
         return res.status(200).json({ status: true, data: messages });
+
     } catch (error) {
         console.log('Error in getting messages:', error);
         return res.status(500).json({ status: false, message: 'Internal Server Error' });
@@ -37,41 +36,24 @@ export const getMessage = async (req: Request, res: Response) => {
 
 export const sendMessage = async (req: Request, res: Response) => {
     try {
+        if (!req.user?._id) {
+            return res.status(401).json({ status: false, message: "Unauthorized" });
+        }
+
         const { text, image } = req.body;
         const { id: receiverId } = req.params;
         const senderId = req.user._id;
 
-        let imageUrl;
+        const { message, error } = await MessageService.sendMessage(senderId, receiverId, text, image);
 
-        if (image) {
-            try {
-                const uploadResponse = await cloudinary.uploader.upload(image);
-                imageUrl = uploadResponse.secure_url;
-            } catch (err) {
-                console.log("Cloudinary upload failed:", err);
-            }
+        if (error) {
+            console.error("Error in sendMessage:", error);
+            return res.status(500).json({ status: false, message: "Internal Server Error" });
         }
 
-        const newMessage = new Message({
-            senderId,
-            receiverId,
-            text,
-            image: imageUrl,
-        });
-
-        await newMessage.save();
-
-        // todo: realtime functionality goes here socket.io
-        const receiverSocketId = getReceiverSocketId(receiverId);
-
-        if (receiverSocketId){
-            // emit broadcasts, we need to send to a specific user
-            io.to(receiverSocketId).emit("newMessage", newMessage)
-        }
-        
-        return res.status(201).json({ status: true, data: newMessage });
+        return res.status(201).json({ status: true, data: message });
     } catch (error) {
-        console.log('Error in creating message:', error);
-        return res.status(500).json({ status: false, message: 'Internal Server Error' });
+        console.error("Error in sendMessage controller:", error);
+        return res.status(500).json({ status: false, message: "Internal Server Error" });
     }
-}
+};
