@@ -21,6 +21,7 @@ export interface AuthStore {
   isUpdatingProfile: boolean;
   onlineUsers: Array<string>;
   socket: Socket | null;
+  privateKey: string | null;
 
   checkAuth: () => Promise<void>;
   signUp: (data: userType) => Promise<void>;
@@ -31,6 +32,7 @@ export interface AuthStore {
 
   connectSocket: () => void;
   disconnectSocket: () => void;
+  keysCheckAndGenerate: () => Promise<{publicKey: string, privateKey: string}>;
 }
 
 

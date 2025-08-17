@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { io } from "socket.io-client"
 import Cookies from 'js-cookie';
+import { checkPrivateKeyAndGenerate } from '../utils/indexDBKey';
 
 const baseURL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
@@ -17,11 +18,26 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     isUpdatingProfile: false,
     onlineUsers: [],
     socket: null,
+    privateKey: null,
 
 
     checkAuth: async () => {
         try {
             const res = await axiosInstance.get('/auth/check');
+            const keys = await get().keysCheckAndGenerate();
+
+            if (keys.privateKey) {
+                set({ privateKey: keys.privateKey });
+
+                if (keys.publicKey) {
+                    await axiosInstance.post('/auth/update-public-key', { publicKey: keys.publicKey }, {
+                        headers: {
+                            Authorization: `Bearer ${Cookies.get('accessToken')}` // Explicit token
+                        }
+                    });
+                }
+            }
+
             set({ authUser: res.data.data });
             get().connectSocket();
         } catch (error) {
@@ -39,6 +55,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             console.log("Response signin:", res.data);
             const accessToken = res.data.accessToken;
             Cookies.set('accessToken', accessToken);
+            const keys = await get().keysCheckAndGenerate();
+
+            if (keys.privateKey) {
+                set({ privateKey: keys.privateKey });
+
+                if (keys.publicKey) {
+                    await axiosInstance.post('/auth/update-public-key', { publicKey: keys.publicKey }, {
+                        headers: {
+                            Authorization: `Bearer ${Cookies.get('accessToken')}` // Explicit token
+                        }
+                    });
+                }
+            }
             set({ authUser: res.data.data });
             get().connectSocket();
             toast.success("Account created successfully");
@@ -68,6 +97,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         try {
             const res = await axiosInstance.post("/auth/login", data);
             const accessToken = res.data.accessToken;
+            const keys = await get().keysCheckAndGenerate();
+
+            if (keys.privateKey) {
+                set({ privateKey: keys.privateKey });
+
+                if (keys.publicKey) {
+                    await axiosInstance.post('/auth/update-public-key', { publicKey: keys.publicKey }, {
+                        headers: {
+                            Authorization: `Bearer ${Cookies.get('accessToken')}` // Explicit token
+                        }
+                    });
+                }
+            }
             set({ authUser: res.data.user });
             Cookies.set('accessToken', accessToken)
             toast.success("Logged In successfully");
@@ -81,7 +123,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         }
     },
 
-    refresh: async() => {
+    refresh: async () => {
         try {
             const res = await axiosInstance.post("/auth/refresh");
             const accessToken = res.data.data;
@@ -131,4 +173,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             get().socket?.disconnect();
         }
     },
+
+    keysCheckAndGenerate: async () => {
+        return await checkPrivateKeyAndGenerate();
+    }
 }))
