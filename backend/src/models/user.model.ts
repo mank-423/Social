@@ -19,6 +19,9 @@ const userSchema: Schema = new Schema({
     profilePic: {
         type: String,
         default: "",
+    },
+    pKey: {
+        type: String,
     }
 }, {
     timestamps: true,

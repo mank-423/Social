@@ -75,4 +75,18 @@ export class AuthService {
         }
     }
 
+    static async updatePublicKey(publicKey: string, userId: string) {
+        if (!publicKey || !userId) {
+            return { error: 'UserId or Public key missing', status: false };
+        }
+
+        try {
+            const user = await User.findByIdAndUpdate(userId, { pKey: publicKey }, { new: true });
+            return { error: '', status: true };
+        } catch (error) {
+            console.log('Error occured', error);
+            return { error, status: false }
+        }
+    }
+
 }

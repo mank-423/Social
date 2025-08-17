@@ -34,7 +34,7 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    const {user, accessToken, error} = await AuthService.logIn(email, password, res);
+    const { user, accessToken, error } = await AuthService.logIn(email, password, res);
 
     if (error) {
       return res.status(400).json({ status: false, message: error });
@@ -69,7 +69,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
     const userId = req.user._id;
 
-    const {user, error} = await AuthService.updateProfile(profileUrl, userId);
+    const { user, error } = await AuthService.updateProfile(profileUrl, userId);
 
     if (error) {
       return res.status(400).json({ status: false, message: error });
@@ -97,12 +97,34 @@ export const checkAuth = (req: Request, res: Response) => {
 export const generateRefreshToken = (req: Request, res: Response) => {
   const token = req.cookies.jwt;
 
-  const {error, accessToken} = AuthService.generateRefreshToken(token);
+  const { error, accessToken } = AuthService.generateRefreshToken(token);
 
-  if (error){
+  if (error) {
     console.log('Error:', error);
-    return res.status(500).json({status: false, message:'Internal Server Error'});
+    return res.status(500).json({ status: false, message: 'Internal Server Error' });
   }
 
   return res.status(200).json({ status: true, message: 'New access token', data: accessToken });
+}
+
+// Update public key in user
+export const updatePublicKey = async (req: Request, res: Response) => {
+  try {
+    // public key on UI
+    const publicKey = req.body.publicKey;
+
+    // User Id of user
+    const userId = req.user?._id;
+
+    // service response
+    const { error, status } = await AuthService.updatePublicKey(publicKey, userId);
+
+    if (error && !status) {
+      res.status(500).json({ status: false, message: 'Internal Server Error' });
+    }
+    res.status(200).json({ status: true, message: 'Public key saved for the user' })
+  } catch (error) {
+    console.log('Error checking auth:', error);
+    return res.status(500).json({ status: false, message: 'Internal Server Error' });
+  }
 }

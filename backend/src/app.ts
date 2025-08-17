@@ -22,13 +22,16 @@ app.use(express.json());
 app.use(
     cors({ 
         credentials: true, 
-        origin: [
-            'htttp://localhost:5173', 
-            'https://social-1-wc5k.onrender.com'
-        ], 
+        origin: true,
         exposedHeaders: ['Set-Cookie'] 
     })
 );
+
+/*origin: [
+            'htttp://localhost:5173', 
+            'https://social-1-wc5k.onrender.com'
+        ],  
+*/
 
 // GLobal rate limiting
 app.use(globalLimiter);
