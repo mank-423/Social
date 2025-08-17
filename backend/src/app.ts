@@ -22,7 +22,10 @@ app.use(express.json());
 app.use(
     cors({ 
         credentials: true, 
-        origin: true, 
+        origin: [
+            'htttp://localhost:5173', 
+            'https://social-1-wc5k.onrender.com'
+        ], 
         exposedHeaders: ['Set-Cookie'] 
     })
 );
