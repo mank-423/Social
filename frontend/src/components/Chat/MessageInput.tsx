@@ -1,24 +1,61 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent, useEffect, useCallback } from "react";
 import { useChatStore } from "../../store/useChatStore";
 import { Image, Send, X } from "lucide-react";
 
 const MessageInput = () => {
-
     const [text, setText] = useState<string>("");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isTyping, setIsTyping] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { sendMessages, isMessageSending } = useChatStore();
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const { sendMessages, isMessageSending, startTyping, stopTyping } = useChatStore();
 
-    const handleSendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
+    // Debounced typing detection
+    const handleTyping = useCallback(() => {
+        
+        if (!isTyping) {
+            setIsTyping(true);
+            startTyping();
+        }
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Set new timeout to stop typing after 1 second of inactivity
+        typingTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+            stopTyping();
+        }, 1000);
+    }, [isTyping, startTyping, stopTyping]);
+
+    const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setText(e.target.value);
+        handleTyping();
+    };
+
+    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
        
         if (!text.trim() && !imagePreview) return;
+
+        // Stop typing when sending
+        if (isTyping) {
+            setIsTyping(false);
+            stopTyping();
+        }
+
+        // Clear typing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
 
         try {
             await sendMessages({
                 text: text.trim(),
                 image: imagePreview,
-            })
+            });
 
             setText("");
             setImagePreview(null);
@@ -29,22 +66,33 @@ const MessageInput = () => {
     };
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        
         const file = e.target.files?.[0];
-
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = () => {
             setImagePreview(reader.result as string);
-        }
+        };
         reader.readAsDataURL(file);
-    }
+    };
 
-     const removeImage = () => { 
+    const removeImage = () => { 
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
-     };
+    };
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+            // Stop typing when component unmounts
+            if (isTyping) {
+                stopTyping();
+            }
+        };
+    }, [isTyping, stopTyping]);
 
     return (
         <div className="p-4 w-full">
@@ -75,7 +123,7 @@ const MessageInput = () => {
                         className="w-full input input-bordered rounded-lg input-sm sm:input-md"
                         placeholder="Type a message..."
                         value={text}
-                        onChange={(e) => setText(e.target.value)}
+                        onChange={handleTextChange}
                     />
                     <input
                         type="file"

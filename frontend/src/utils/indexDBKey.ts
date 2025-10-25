@@ -1,4 +1,3 @@
-import { get, set } from 'idb-keyval';
 import { generateKeyPairs } from '../utils/generateKeyPair';
 import { useAuthStore } from '../store/useAuthStore';
 import sodium from 'libsodium-wrappers'
@@ -27,7 +26,7 @@ export const checkPrivateKeyAndGenerate = async () => {
         localStorage.setItem('privateKey', privateKeyB64);
 
         // Save privateKey to Zustand (in-memory)
-        useAuthStore.setState({ privateKey });
+        useAuthStore.setState({ privateKey: privateKeyB64 });
 
         return { publicKey, privateKey: privateKeyB64 };
 

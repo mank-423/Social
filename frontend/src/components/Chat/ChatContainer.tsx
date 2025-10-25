@@ -6,6 +6,7 @@ import MessageInput from "./MessageInput";
 import { useAuthStore } from "../../store/useAuthStore";
 import avatar from "../../assets/avatar.png"
 import { formatMessageTime } from "../../utils/lib";
+import TypingIndicator from "./TypingIndicator";
 
 const ChatContainer = () => {
 
@@ -78,6 +79,8 @@ const ChatContainer = () => {
                     </div>
                 ))}
             </div>
+
+            <TypingIndicator />
 
             <MessageInput />
 

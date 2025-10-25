@@ -32,7 +32,7 @@ export interface AuthStore {
 
   connectSocket: () => void;
   disconnectSocket: () => void;
-  keysCheckAndGenerate: () => Promise<{publicKey: string, privateKey: string}>;
+  keysCheckAndGenerate: () => Promise<{ publicKey: string, privateKey: string }>;
 }
 
 
@@ -49,10 +49,18 @@ export interface ContactStore {
   messages: Array<messageStructure>;
   selectedUser: null | AuthUser;
   isMessageSending: boolean;
+  typingUsers: string[]; // Typing indicators state
+
+  // Message functions
   subscribeToMessages: () => void;
   unsubscribeToMessages: () => void;
   setSelectedUser: (data: AuthUser | null) => void;
   getUsers: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessages: (messageData: any) => Promise<void>;
+
+  // Typing functions
+  startTyping: () => void;
+  stopTyping: () => void;
+  setTypingUser: (userId: string, isTyping: boolean) => void;
 }
