@@ -5,6 +5,7 @@ import { Response } from "express";
 import { generateAccessToken, generateToken } from '../utils/tokenGenerate';
 import cloudinary from '../utils/cloudinary';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 export class AuthService {
     static async signUp(email: string, fullName: string, password: string, res: Response) {
@@ -13,11 +14,15 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(password, parseInt(saltRounds));
 
+        // encryption key
+        const encryptionKey = crypto.randomBytes(32).toString('base64');
+
         const newUser = new User({
             email,
             fullName,
             password: hashedPassword,
-            profileUrl: ""
+            profileUrl: "",
+            encryptionKey: encryptionKey,
         });
 
         await newUser.save();

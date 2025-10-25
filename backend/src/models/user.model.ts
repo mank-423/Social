@@ -20,8 +20,9 @@ const userSchema: Schema = new Schema({
         type: String,
         default: "",
     },
-    pKey: {
+    encryptionKey: {
         type: String,
+        required: true,
     }
 }, {
     timestamps: true,
