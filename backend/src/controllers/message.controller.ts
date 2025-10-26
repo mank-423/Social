@@ -57,3 +57,16 @@ export const sendMessage = async (req: Request, res: Response) => {
         return res.status(500).json({ status: false, message: "Internal Server Error" });
     }
 };
+
+export const pingServer = async (req: Request, res: Response) => {
+    try {
+        return res.status(200).json({
+            status: true,
+            message: 'Server is reachable',
+            timestamp: new Date().toISOString(),
+        })
+    } catch (error) {
+        console.error("Ping failed:", error);
+        return res.status(500).json({ status: false, message: "Ping failed" });
+    }
+}

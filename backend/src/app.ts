@@ -11,6 +11,7 @@ import { authLimiter, globalLimiter } from './utils/rateLimiter';
 import authRoutes from './routes/auth.routes';
 import messageRoutes from './routes/message.routes';
 import { app, server } from './lib/socket';
+import { pingServer } from './controllers/message.controller';
 
 dotenv.config();
 
@@ -64,6 +65,9 @@ app.use('/api/auth', authLimiter, authRoutes);
 
 // Message route
 app.use('/api/message', authLimiter, messageRoutes);
+
+// Ping for network connectivity
+app.get('/api/ping', pingServer);
 
 // Docs route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJSDoc(swaggerOptions)));

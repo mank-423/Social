@@ -19,7 +19,16 @@ const messageSchema: Schema = new Schema({
     },
     image: {
         type: String,
-    } 
+    } ,
+    status: {
+        type: String,
+        enum: ['sending', 'sent', 'delivered', 'read', 'failed'],
+        default: 'sent',
+    },
+    retryCount: {
+        type: Number,
+        default: 0,
+    }
 },{
     timestamps: true,
 });
