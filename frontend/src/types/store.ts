@@ -58,6 +58,10 @@ export interface ContactStore {
   getUsers: () => Promise<void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessages: (messageData: any) => Promise<void>;
+  retryMessages: (messageData: any) => Promise<void>;
+  queueMessages: (messageData: any) => void;
+  processQueueMsg: () => Promise<void>;
+  clearQueue: () => void;
 
   // Typing functions
   startTyping: () => void;

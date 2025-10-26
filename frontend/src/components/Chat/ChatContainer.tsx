@@ -7,10 +7,20 @@ import { useAuthStore } from "../../store/useAuthStore";
 import avatar from "../../assets/avatar.png"
 import { formatMessageTime } from "../../utils/lib";
 import TypingIndicator from "./TypingIndicator";
+import { CheckCheck, Loader2 } from "lucide-react";
 
 const ChatContainer = () => {
 
-    const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeToMessages } = useChatStore();
+    const { 
+        messages, 
+        getMessages, 
+        isMessagesLoading, 
+        selectedUser, 
+        subscribeToMessages, 
+        unsubscribeToMessages, 
+        retryMessages 
+    } = useChatStore();
+    
     const { authUser } = useAuthStore();
     const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +38,7 @@ const ChatContainer = () => {
             messageEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
-    
+
     if (isMessagesLoading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto">
@@ -73,7 +83,28 @@ const ChatContainer = () => {
                                     className="sm:max-w-[200px] rounded-md mb-2"
                                 />
                             )}
-                            {message.text && <p>{message.text}</p>}
+
+                            <div className="flex flex-row gap-2">
+                                {message.text && <p>{message.text}</p>}
+
+                                <div className="flex justify-end items-center gap-1 mt-1">
+                                    {message.status === 'sending' && (
+                                        <Loader2 className="size-4 animate-spin text-zinc-400" />
+                                    )}
+                                    {message.status === 'failed' && (
+                                        <button
+                                            onClick={() => retryMessages(message)}
+                                            className="text-red-400 hover:text-red-300 text-xs"
+                                        >
+                                            Retry
+                                        </button>
+                                    )}
+                                    {message.status === 'sent' && (
+                                        <CheckCheck className="size-4 font-bold text-green-400" />
+                                    )}
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>

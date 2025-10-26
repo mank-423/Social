@@ -7,6 +7,7 @@ import { AxiosError } from 'axios';
 import { io } from "socket.io-client"
 import Cookies from 'js-cookie';
 import { checkPrivateKeyAndGenerate } from '../utils/indexDBKey';
+import { useChatStore } from './useChatStore';
 
 const baseURL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
@@ -83,7 +84,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     logOut: async () => {
         try {
             await axiosInstance.post("/auth/logout");
+            const { clearQueue } = useChatStore.getState();
+            clearQueue();
             Cookies.remove('accessToken');
+
             set({ authUser: null });
             get().disconnectSocket();
             toast.success("Logged out successfully");
