@@ -1,6 +1,7 @@
 import type { Socket } from "socket.io-client";
 import type { LoginUser, UpdateUser, userType } from "./auth";
 import type { messageStructure } from "./message";
+import type { AxiosResponse } from "axios";
 
 export interface AuthUser {
   _id: string;
@@ -55,7 +56,7 @@ export interface ContactStore {
   subscribeToMessages: () => void;
   unsubscribeToMessages: () => void;
   setSelectedUser: (data: AuthUser | null) => void;
-  getUsers: () => Promise<void>;
+  getUsers: (page: number) => Promise<AxiosResponse<any, any> | void>;
   getMessages: (userId: string) => Promise<void>;
   sendMessages: (messageData: any) => Promise<void>;
   retryMessages: (messageData: any) => Promise<void>;

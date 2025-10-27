@@ -16,11 +16,19 @@ export const useChatStore = create<ContactStore>((set, get) => ({
     selectedUser: null,
 
 
-    getUsers: async () => {
+    getUsers: async (page: number = 1) => {
         set(({ isUsersLoading: true }));
         try {
-            const res = await axiosInstance.get('/message/users');
-            set({ users: res.data.data });
+            const res = await axiosInstance.get(`/message/users?page=${page}&limit=10`);
+            
+            // set({ users: res.data.data });
+
+            // New paginated setting of users
+            set((state) => ({
+                users: page === 1 ? res.data.data : [...state.users, ...res.data.data]
+            }));
+
+            return res;
         } catch (error) {
             toast.error('Error getting contacts');
         } finally {
