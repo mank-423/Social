@@ -29,14 +29,29 @@ export const getUsersForSidebar = async (req: Request, res: Response) => {
 export const getMessage = async (req: Request, res: Response) => {
     try {
         const { id: userToChatId } = req.params;
+        const { limit = 50, before } = req.query;
+
+        const limitNum = Number(limit);
+
+        // Parse and validate cursor
+        let beforeDate: Date | undefined;
+        if (before) {
+            beforeDate = new Date(before as string);
+            if (isNaN(beforeDate.getTime())) {
+                return res.status(400).json({
+                    status: false,
+                    message: "Invalid cursor format"
+                });
+            }
+        }
 
         const myId = req.user._id;
-        const { messages, error } = await MessageService.getMessages(userToChatId, myId);
+        const { messages, hasMore, nextCursor, error } = await MessageService.getMessages(userToChatId, myId, limitNum, beforeDate);
 
         if (error) {
             return res.status(400).json({ status: false, message: error })
         }
-        return res.status(200).json({ status: true, data: messages });
+        return res.status(200).json({ status: true, data: {messages}, pagination: {hasMore, nextCursor} });
 
     } catch (error) {
         console.log('Error in getting messages:', error);

@@ -14,16 +14,44 @@ export class MessageService {
         return { filteredUsers };
     }
 
-    static async getMessages(toChatWithId: string, currentUserId: string) {
+    static async getMessages(toChatWithId: string, currentUserId: string, limit: number = 50, before?: Date) {
         try {
-            const messages = await Message.find({
+
+            const query: Record<string, any> = {
                 $or: [
                     { senderId: currentUserId, receiverId: toChatWithId },
                     { senderId: toChatWithId, receiverId: currentUserId }
                 ]
-            });
+            };
 
-            return { messages, error: '' };
+
+            // Cursor given for getting mssg prvs the createdAt
+            if (before) {
+                query['createdAt'] = { $lt: before };
+            }
+
+            // Sorting the messages in reverse
+            const messages = await Message.find(query).
+                sort({ createdAt: -1 }).
+                limit(limit + 1);
+
+            const hasMore = messages.length > limit;
+            const messagesToReturn = hasMore ? messages.slice(0, -1) : messages;
+
+            // Return in chronological order (oldest first) for the UI
+            const chronologicalMessages = messagesToReturn.reverse();
+
+            // Get the oldest message's date for next cursor
+            const nextCursor = chronologicalMessages.length > 0
+                ? chronologicalMessages[0].createdAt // Oldest message's date
+                : null;
+
+            return { 
+                messages: messagesToReturn, 
+                hasMore, 
+                nextCursor, 
+                error: '' 
+            };
         } catch (error) {
             return { messages: [], error };
         }

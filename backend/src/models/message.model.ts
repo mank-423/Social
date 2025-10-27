@@ -33,6 +33,10 @@ const messageSchema: Schema = new Schema({
     timestamps: true,
 });
 
+// Add compound index for efficient pagination
+messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
+messageSchema.index({ receiverId: 1, senderId: 1, createdAt: -1 });
+
 const Message = mongoose.model('message', messageSchema);
 
 export default Message;
