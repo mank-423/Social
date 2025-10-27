@@ -7,7 +7,7 @@ const MessageInput = () => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const { sendMessages, isMessageSending, startTyping, stopTyping } = useChatStore();
 
     // Debounced typing detection
