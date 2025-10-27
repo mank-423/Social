@@ -52,12 +52,17 @@ export interface ContactStore {
   isMessageSending: boolean;
   typingUsers: string[]; // Typing indicators state
 
+  hasMoreMessages: boolean;
+  messagesCursor: string | null;
+  isLoadingMoreMessages: boolean;
+
   // Message functions
   subscribeToMessages: () => void;
   unsubscribeToMessages: () => void;
   setSelectedUser: (data: AuthUser | null) => void;
   getUsers: (page: number) => Promise<AxiosResponse<any, any> | void>;
   getMessages: (userId: string) => Promise<void>;
+  loadMoreMessages: () => Promise<void>;
   sendMessages: (messageData: any) => Promise<void>;
   retryMessages: (messageData: any) => Promise<void>;
   queueMessages: (messageData: any) => void;

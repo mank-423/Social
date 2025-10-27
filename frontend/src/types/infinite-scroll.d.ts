@@ -1,3 +1,4 @@
+// types/infinite-scroll.d.ts
 declare module 'react-infinite-scroll-component' {
   import { Component } from 'react';
   
@@ -9,8 +10,8 @@ declare module 'react-infinite-scroll-component' {
     endMessage?: React.ReactNode;
     children?: React.ReactNode;
     scrollableTarget?: string;
+    inverse?: boolean;
     style?: React.CSSProperties;
-    className?: string;
   }
   
   class InfiniteScroll extends Component<InfiniteScrollProps> {}

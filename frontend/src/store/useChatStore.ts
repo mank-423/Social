@@ -15,12 +15,16 @@ export const useChatStore = create<ContactStore>((set, get) => ({
     typingUsers: [],
     selectedUser: null,
 
+    // Pagination in mssgs
+    hasMoreMessages: false,
+    messagesCursor: null,
+    isLoadingMoreMessages: false,
 
     getUsers: async (page: number = 1) => {
         set(({ isUsersLoading: true }));
         try {
             const res = await axiosInstance.get(`/message/users?page=${page}&limit=10`);
-            
+
             // set({ users: res.data.data });
 
             // New paginated setting of users
@@ -39,12 +43,44 @@ export const useChatStore = create<ContactStore>((set, get) => ({
     getMessages: async (userId: string) => {
         set({ isMessagesLoading: true });
         try {
-            const res = await axiosInstance.get(`/message/${userId}`);
-            set({ messages: res.data.data });
+            const res = await axiosInstance.get(`/message/${userId}?limit=50`);
+            set({
+                messages: res.data.data.messages,
+                hasMoreMessages: res.data.pagination.hasMore,
+                messagesCursor: res.data.pagination.nextCursor
+            });
         } catch (error) {
             toast.error('Error getting messages');
         } finally {
             set({ isMessagesLoading: false });
+        }
+    },
+
+    loadMoreMessages: async () => {
+        const { selectedUser, messagesCursor, isLoadingMoreMessages, hasMoreMessages } = get();
+
+
+        if (!selectedUser || !hasMoreMessages || isLoadingMoreMessages) {
+            return;
+        }
+
+        set({ isLoadingMoreMessages: true });
+
+        try {
+            const url = `/message/${selectedUser._id}?limit=50${messagesCursor ? `&before=${messagesCursor}` : ''}`;
+
+            const res = await axiosInstance.get(url);
+
+            set(state => ({
+                messages: [...res.data.data.messages, ...state.messages],
+                hasMoreMessages: res.data.pagination.hasMore,
+                messagesCursor: res.data.pagination.nextCursor
+            }));
+        } catch (error) {
+            toast.error('Error loading more messages');
+        } finally {
+            console.log('🏁 loadMoreMessages completed');
+            set({ isLoadingMoreMessages: false });
         }
     },
 

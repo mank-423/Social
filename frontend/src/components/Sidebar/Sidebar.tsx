@@ -4,6 +4,7 @@ import SidebarSkeleton from "../Skeleton/SidebarSkeleton";
 import avatar from "../../assets/avatar.png"
 import { useAuthStore } from "../../store/useAuthStore";
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { Users } from "lucide-react";
 
 const Sidebar = () => {
     const { users, getUsers, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
@@ -22,13 +23,13 @@ const Sidebar = () => {
         fetchInitialUsers();
     }, []);
 
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    // const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Fetch more users function for InfiniteScroll
     const fetchMoreUsers = async () => {
         const nextPage = page + 1;
         try {
-            await delay(1000);
+            // await delay(1000);
             const res = await getUsers(nextPage);
             
             if (res?.data.data.length < 10) {
