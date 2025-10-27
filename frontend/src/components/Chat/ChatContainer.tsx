@@ -7,7 +7,7 @@ import { useAuthStore } from "../../store/useAuthStore";
 import avatar from "../../assets/avatar.png"
 import { formatMessageTime } from "../../utils/lib";
 import TypingIndicator from "./TypingIndicator";
-import { ArrowUp, CheckCheck, Loader2, MoreHorizontal } from "lucide-react";
+import { ArrowUp, CheckCheck, Loader2 } from "lucide-react";
 
 const ChatContainer = () => {
     const {
