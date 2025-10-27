@@ -4,8 +4,13 @@ import { getReceiverSocketId, io } from "../lib/socket";
 import cloudinary from "../utils/cloudinary";
 
 export class MessageService {
-    static async getAllUsers(id: string) {
-        const filteredUsers = await User.find({ _id: { $ne: id } }).select("-password");
+    static async getAllUsers(id: string, skip: number, limitNum: number) {
+        const filteredUsers =
+            await User.find({ _id: { $ne: id } }).
+                select("-password").
+                skip(skip).
+                limit(limitNum);
+
         return { filteredUsers };
     }
 

@@ -6,9 +6,19 @@ export const getUsersForSidebar = async (req: Request, res: Response) => {
         return res.status(401).json({ status: false, message: "Unauthorized" });
     }
 
+    const { page = 1, limit = 10 } = req.query;
+
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+
+    const skip: number = (Number(pageNum - 1)) * Number(limitNum);
+
     try {
         const loggedInUserId = req.user._id;
-        const { filteredUsers } = await MessageService.getAllUsers(loggedInUserId);
+
+        // Paginated users
+        const { filteredUsers } = await MessageService.getAllUsers(loggedInUserId, skip, limitNum);
+
         return res.status(200).json({ status: true, message: "Sidebar users fetched", data: filteredUsers });
     } catch (error) {
         console.log("Error in get users sidebar:", error);
