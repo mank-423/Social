@@ -4,12 +4,24 @@ const checkForRegex = (pattern: RegExp, pass: string): boolean => {
     return pattern.test(pass);
 }
 
-export const signUpValidation = async(fullName: string, email: string, password: string) => {
-    
+export const signUpValidation = async (fullName: string, email: string, password: string) => {
+
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     let errors: { key: string, message: string }[] = [];
+
+    if (!fullName || fullName.trim() === "") {
+        errors.push({ key: "fullName", message: "Full name is required" });
+    }
+
+    if (!email || email.trim() === "") {
+        errors.push({ key: "email", message: "Email is required" });
+    }
+
+    if (!password || password.trim() === "") {
+        errors.push({ key: "password", message: "Password is required" });
+    }
 
     // Password validation
     if (password) {
@@ -51,13 +63,6 @@ export const signUpValidation = async(fullName: string, email: string, password:
                 message: emailError
             })
         }
-    }
-
-    if (fullName.length <= 0) {
-        errors.push({
-            key: 'name',
-            message: 'Full Name is required',
-        })
     }
 
     return errors;

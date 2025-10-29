@@ -1,14 +1,15 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "src/app.ts",
+  "main": "src/server.ts",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "nodemon --exec ts-node src/app.ts",
-    "prod": "node dist/app.js",
+    "start": "node dist/server.js",
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "prod": "node dist/server.js",
     "user-seed": "npx ts-node src/seeds/user.seed.ts",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --runInBand --detectOpenHandles",
+    "test:watch": "jest --watchAll"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +41,12 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
+    "mongodb-memory-server": "^10.2.3",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5"
   }
 }
