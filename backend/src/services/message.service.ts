@@ -46,11 +46,11 @@ export class MessageService {
                 ? chronologicalMessages[0].createdAt // Oldest message's date
                 : null;
 
-            return { 
-                messages: messagesToReturn, 
-                hasMore, 
-                nextCursor, 
-                error: '' 
+            return {
+                messages: messagesToReturn,
+                hasMore,
+                nextCursor,
+                error: ''
             };
         } catch (error) {
             return { messages: [], error };
@@ -66,10 +66,14 @@ export class MessageService {
                 imageUrl = uploadResponse.secure_url;
             }
 
+            if ((!text || text.length === 0) && (!image || image.length === 0)) {
+                return { error: "Message must contain either text or image" }
+            }
+
             const newMessage = new Message({
                 senderId,
                 receiverId,
-                text,
+                text: text || "",
                 image: imageUrl,
             });
 

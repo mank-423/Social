@@ -51,7 +51,7 @@ export const getMessage = async (req: Request, res: Response) => {
         if (error) {
             return res.status(400).json({ status: false, message: error })
         }
-        return res.status(200).json({ status: true, data: {messages}, pagination: {hasMore, nextCursor} });
+        return res.status(200).json({ status: true, data: { messages }, pagination: { hasMore, nextCursor } });
 
     } catch (error) {
         console.log('Error in getting messages:', error);
@@ -72,7 +72,10 @@ export const sendMessage = async (req: Request, res: Response) => {
         const { message, error } = await MessageService.sendMessage(senderId, receiverId, text, image);
 
         if (error) {
-            console.error("Error in sendMessage:", error);
+            if (error === "Message must contain either text or image") {
+                return res.status(400).json({ status: false, message: "Message must contain either text or image" });
+            }
+
             return res.status(500).json({ status: false, message: "Internal Server Error" });
         }
 
