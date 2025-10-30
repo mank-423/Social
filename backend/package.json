@@ -9,7 +9,12 @@
     "user-seed": "npx ts-node src/seeds/user.seed.ts",
     "build": "tsc",
     "test": "jest --runInBand --detectOpenHandles",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "test:unit": "jest src/tests/unit --runInBand --detectOpenHandles",
+    "test:integration": "jest src/tests/integration --runInBand --detectOpenHandles",
+    "test:unit:watch": "jest src/tests/unit --watchAll",
+    "test:integration:watch": "jest src/tests/integration --watchAll",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [],
   "author": "",
