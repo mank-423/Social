@@ -41,7 +41,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (accessToken) {
-      return res.status(200).json({ user, accessToken });
+      return res.status(200).json({ status: true, user, accessToken });
     }
 
   } catch (error) {
@@ -105,26 +105,4 @@ export const generateRefreshToken = (req: Request, res: Response) => {
   }
 
   return res.status(200).json({ status: true, message: 'New access token', data: accessToken });
-}
-
-// Update public key in user
-export const updatePublicKey = async (req: Request, res: Response) => {
-  try {
-    // public key on UI
-    const publicKey = req.body.publicKey;
-
-    // User Id of user
-    const userId = req.user?._id;
-
-    // service response
-    const { error, status } = await AuthService.updatePublicKey(publicKey, userId);
-
-    if (error && !status) {
-      res.status(500).json({ status: false, message: 'Internal Server Error' });
-    }
-    res.status(200).json({ status: true, message: 'Public key saved for the user' })
-  } catch (error) {
-    console.log('Error checking auth:', error);
-    return res.status(500).json({ status: false, message: 'Internal Server Error' });
-  }
 }

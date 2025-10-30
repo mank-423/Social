@@ -34,6 +34,15 @@ export class AuthService {
 
 
     static async logIn(email: string, password: string, res: Response) {
+        
+        if (!email || email.length === 0){
+            return { error: 'Invalid email', accessToken: '', user: null };
+        }
+
+        else if (!password || password.length === 0){
+            return { error: 'Invalid password', accessToken: '', user: null };
+        }
+        
         const user = await User.findOne({ email });
 
         if (!user) {
@@ -77,20 +86,6 @@ export class AuthService {
             return { error: '', accessToken };
         } catch (err) {
             return { error: 'Invalid refresh token', accessToken: '' };
-        }
-    }
-
-    static async updatePublicKey(publicKey: string, userId: string) {
-        if (!publicKey || !userId) {
-            return { error: 'UserId or Public key missing', status: false };
-        }
-
-        try {
-            const user = await User.findByIdAndUpdate(userId, { pKey: publicKey }, { new: true });
-            return { error: '', status: true };
-        } catch (error) {
-            console.log('Error occured', error);
-            return { error, status: false }
         }
     }
 
