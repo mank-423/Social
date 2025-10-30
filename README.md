@@ -2,7 +2,8 @@
 
 A full-stack real-time chat application built with modern web technologies. Features instant messaging, offline support, typing indicators, and seamless message synchronization across devices.
 
-![Chatty Demo]([https://via.placeholder.com/800x400/3B82F6/FFFFFF?text=Chatty+Real-time+Chat](https://social-1-wc5k.onrender.com))
+[![Chatty Demo](https://via.placeholder.com/800x400/3B82F6/FFFFFF?text=Chatty+Real-time+Chat)](https://social-1-wc5k.onrender.com)
+
 
 ## 🚀 Features
 
